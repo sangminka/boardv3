@@ -18,11 +18,6 @@ public class BoardRepository {
     // final이니까 반드시 초기화 해줘야함함
     private final EntityManager em;
 
-    // DI = 의존성 주입(의존하고 있는게 IoC에 떠있어야함)
-    // public BoardRepository(EntityManager em) {
-    // this.em = em;
-    // }
-
     public Board findById(int id) {
         Board board = em.find(Board.class, id);
         return board;
