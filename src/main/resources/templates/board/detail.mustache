@@ -28,16 +28,20 @@
     <!-- 댓글 -->
     <div class="card mt-3">
         <!-- 댓글등록 -->
-        <div class="card-body">
-            <form action="/replies/save" method="post">
-                <textarea class="form-control" rows="2" name="comment"></textarea>
-                <div class="d-flex justify-content-end">
-                <button class="btn btn-secondary mt-1">                        
-                        댓글등록    
-                    </button>
-                </div>
-            </form>
-        </div>
+            <div class="card-body">
+                <form action="/replies/save" method="post">
+                    <input type= "hidden" name = "boardId" value="{{model.id}}"/>
+                    <textarea id = "comment" class="form-control" rows="2" name="comment"></textarea>
+                    <div class="d-flex justify-content-end">
+                    {{#sessionUser}}
+                        <button class="btn btn-secondary mt-1">                        
+                            댓글등록    
+                        </button>
+                    {{/sessionUser}}
+
+                    </div>
+                </form>
+            </div>
 
         <!-- 댓글목록 -->
         <div class="card-footer">
@@ -45,28 +49,36 @@
         </div>
         <div class="list-group">
             <!-- 댓글아이템 -->
-            <div class="list-group-item d-flex justify-content-between align-items-center">
-                <div class="d-flex">
-                    <div class="px-1 me-1 bg-secondary text-white rounded">익명</div>
-                    <div>댓글 내용2</div>
+            {{#model.replies}}
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div class="d-flex">
+                        <div class="px-1 me-1 bg-secondary text-white rounded">{{replyUsername}}</div>
+                        <div>{{comment}}</div>
+                    </div>
+                    {{#isReplyOwner}}
+                        <form action="/replies/{{id}}/delete?boardId={{model.id}}" method="post">
+                            <button class="btn">🗑</button>
+                        </form>
+                    {{/isReplyOwner}}
                 </div>
-                <form action="/replies/1/delete" method="post">
-                    <button class="btn">🗑</button>
-                </form>
-            </div>
-            <!-- 댓글아이템 -->
-            <div class="list-group-item d-flex justify-content-between align-items-center">
-                <div class="d-flex">
-                    <div class="px-1 me-1 bg-secondary text-white rounded">익명</div>
-                    <div>댓글 내용1</div>
-                </div>
-                <form action="/replies/1/delete" method="post">
-                    <button class="btn">🗑</button>
-                </form>
-            </div>
+            {{/model.replies}}
         </div>
     </div>
 </div>
+{{^sessionUser}}
+<script>
+  const commentTextarea = document.querySelector("#comment");
+
+  if (commentTextarea) {
+    commentTextarea.addEventListener("focus", () => {
+      alert("로그인하세요");
+      commentTextarea.blur(); // 입력 막기
+    });
+  }
+</script>
+{{/sessionUser}}
+
+
 
 </body>
 </html>

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.boardv1.user.User;
 
@@ -98,6 +99,14 @@ public class BoardController {
 
         req.setAttribute("model", dto);
         return "board/detail";
+    }
+
+    @GetMapping("/api/boards/{id}")
+    public @ResponseBody BoardResponse.DetailDTO apiDetail(@PathVariable("id") int id) {
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        Integer sessionUserId = sessionUser == null ? null : sessionUser.getId();
+        BoardResponse.DetailDTO dto = boardService.상세보기(id, sessionUserId);
+        return dto;
     }
 
 }
