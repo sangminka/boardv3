@@ -4,6 +4,8 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.example.boardv1._core.errors.ex.Exception400;
+import com.example.boardv1._core.errors.ex.Exception401;
 import com.example.boardv1.user.UserRequset.JoinDTO;
 import com.example.boardv1.user.UserRequset.LoginDTO;
 
@@ -21,7 +23,7 @@ public class UserService {
         String getUsername = joinDTO.getUsername();
         Optional<User> optUser = userRepository.findByUsername(getUsername);
         if (optUser.isPresent()) {
-            throw new RuntimeException("중복입니다.");
+            throw new Exception400("중복입니다.");
 
         }
 
@@ -36,10 +38,10 @@ public class UserService {
 
     public User 로그인(LoginDTO reqDto) {
         User findUser = userRepository.findByUsername(reqDto.getUsername())
-                .orElseThrow(() -> new RuntimeException("username을 찾을 수 없어요"));
+                .orElseThrow(() -> new Exception401("username을 찾을 수 없어요"));
 
         if (!findUser.getPassword().equals(reqDto.getPassword())) {
-            throw new RuntimeException("패스워드가 일치하지 않아요");
+            throw new Exception401("패스워드가 일치하지 않아요");
         }
         return findUser;
     }

@@ -10,13 +10,27 @@
                     <input type="text" class="form-control" placeholder="Enter title" name="title" value="{{model.title}}">
                 </div>
                 <div class="mb-3">
-                    <textarea class="form-control" rows="5" name="content">{{model.content}}</textarea>
+                    <textarea id="summernote" class="form-control" rows="5" name="content">{{{model.content}}}</textarea>
                 </div>
                 <button class="btn btn-secondary form-control">글수정하기</button>
             </form>
         </div>
     </div>
 </div>
+<script>
+$(function () {
+  const $sn = $('#summernote');
+
+  // 이미 summernote가 붙어있으면 다시 초기화하지 않음
+  if (!$sn.next('.note-editor').length) {
+    $sn.summernote({
+      placeholder: 'Hello Bootstrap 5',
+      tabsize: 2,
+      height: 200
+    });
+  }
+});
+</script>
 
 </body>
 </html>

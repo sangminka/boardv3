@@ -1,17 +1,20 @@
 package com.example.boardv1.board;
 
 import java.util.List;
-
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.example.boardv1._core.errors.ex.Exception401;
+import com.example.boardv1._core.errors.ex.Exception500;
 import com.example.boardv1.user.User;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -23,8 +26,6 @@ public class BoardController {
 
     private User getSessionUser() {
         User sessionUser = (User) session.getAttribute("sessionUser");
-        if (sessionUser == null)
-            throw new RuntimeException("인증되지 않았습니다.");
         return sessionUser;
     }
 
@@ -33,13 +34,19 @@ public class BoardController {
         // 인증(v). 권한(v)
         User sessionUser = getSessionUser();
 
-        boardService.게시글삭제(id, sessionUser.getId());
+        try {
+            boardService.게시글삭제(id, sessionUser.getId());
+
+        } catch (Exception e) {
+            throw new Exception500("부모있음");
+        }
         return "redirect:/";
     }
 
     // body: title=title7&content7=content7 (x-www-form)
     @PostMapping("/boards/save")
-    public String save(BoardRequest.SaveOrUpdateDTO reqDTO) {
+    public String save(@Valid BoardRequest.SaveOrUpdateDTO reqDTO, Errors errors) {
+
         // 인증(v).권한(x)
         User sessionUser = getSessionUser();
         // Service 호출
@@ -49,7 +56,8 @@ public class BoardController {
     }
 
     @PostMapping("/boards/{id}/update")
-    public String update(@PathVariable("id") int id, BoardRequest.SaveOrUpdateDTO reqDto) {
+    public String update(@PathVariable("id") int id, @Valid BoardRequest.SaveOrUpdateDTO reqDto, Errors errors) {
+
         // 인증(v), 권한(v)
         User sessionUser = getSessionUser();
 
@@ -61,14 +69,16 @@ public class BoardController {
     @GetMapping("/")
     public String index(HttpServletRequest req) {
         List<Board> list = boardService.게시글목록();
-        req.setAttribute("models", list);
+        List<BoardResponse.IndexDTO> dtos = list.stream()
+                .map(BoardResponse.IndexDTO::new)
+                .toList();
+        req.setAttribute("models", dtos);
         return "index";
     }
 
     @GetMapping("/boards/save-form")
     public String saveForm() {
         // 인증(v). 권한(x)
-        getSessionUser();
 
         // Service 호출
         return "board/save-form";

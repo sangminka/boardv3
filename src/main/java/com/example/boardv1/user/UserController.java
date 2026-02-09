@@ -1,12 +1,14 @@
 package com.example.boardv1.user;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -19,7 +21,7 @@ public class UserController {
     // POST
 
     @PostMapping("/login")
-    public String methodName(UserRequset.LoginDTO reqDto, HttpServletResponse resp) {
+    public String methodName(@Valid UserRequset.LoginDTO reqDto, HttpServletResponse resp, Errors errors) {
         User sessionUser = userService.로그인(reqDto);
         session.setAttribute("sessionUser", sessionUser);
         Cookie cookie = new Cookie("username", sessionUser.getUsername());
@@ -30,7 +32,8 @@ public class UserController {
     }
 
     @PostMapping("/join")
-    public String methodName(UserRequset.JoinDTO joinDTO) {
+    public String methodName(@Valid UserRequset.JoinDTO joinDTO, Errors errors) {
+
         userService.회원가입(joinDTO);
         return "redirect:/login-form";
     }

@@ -37,6 +37,7 @@ public class Board {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // PK키 Auto Increment 설정
     private Integer id;
     private String title;
+
     private String content;
 
     // private Integer userId;

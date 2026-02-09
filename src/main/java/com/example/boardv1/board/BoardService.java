@@ -5,6 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.boardv1._core.errors.ex.Exception403;
+import com.example.boardv1._core.errors.ex.Exception404;
+import com.example.boardv1._core.util.YoutubeContentRenderer;
 import com.example.boardv1.user.User;
 
 import lombok.RequiredArgsConstructor;
@@ -22,30 +25,33 @@ public class BoardService {
     public Board 수정폼게시글정보(int id, int sessionUserId) {
 
         Board board = boardRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("id로 게시글을을 찾을수 없어요"));
+                .orElseThrow(() -> new Exception404("게시글을 찾을수 없어요"));
 
         // 권한
         if (sessionUserId != board.getUser().getId())
-            throw new RuntimeException("권한이 없습니다.");
+            throw new Exception403("권한이 없습니다.");
 
         return board;
     }
 
     public BoardResponse.DetailDTO 상세보기(int id, Integer sessionUserId) {
         Board board = boardRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("id로 게시글을을 찾을수 없어요"));
+                .orElseThrow(() -> new Exception404("게시글을 찾을수 없어요"));
 
-        return new BoardResponse.DetailDTO(board, sessionUserId);
+        BoardResponse.DetailDTO dto = new BoardResponse.DetailDTO(board, sessionUserId);
+        // dto.content는 현재 basic clean된 원본이 들어있음 → 렌더링 결과로 덮어쓰기
+        dto.setContent(YoutubeContentRenderer.render(dto.getContent()));
+        return dto;
 
     }
 
     @Transactional // update, delete, insert 할때 붙이세요!!
     public void 게시글수정(int id, String title, String content, int sessionUserId) {
         Board board = boardRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("id로 게시글을 찾을수 없어요"));
+                .orElseThrow(() -> new Exception404("게시글을 찾을수 없어요"));
 
         if (sessionUserId != board.getUser().getId())
-            throw new RuntimeException("권한이 없습니다.");
+            throw new Exception403("권한이 없습니다.");
 
         // User user = (User) board.getUser();
 
@@ -68,13 +74,19 @@ public class BoardService {
 
     @Transactional
     public void 게시글삭제(int id, int sessionUserId) {
+        // 영속화 (Eager 전략 - 조인 다 때렸음)
         Board board = boardRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("id로 게시글을 찾을수 없어요"));
+                .orElseThrow(() -> new Exception404("게시글을 찾을수 없어요"));
 
         if (sessionUserId != board.getUser().getId())
-            throw new RuntimeException("삭제할 권한이 없습니다.");
+            throw new Exception403("삭제할 권한이 없습니다.");
+
+        board.getReplies().forEach(r -> {
+            r.setBoard(null);
+        });
 
         boardRepository.delete(board);
+
     }
 
 }

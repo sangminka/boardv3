@@ -20,8 +20,8 @@
         <div class="d-flex justify-content-end">
             작성자 : {{model.username}}
         </div>
-        <div class="m-4 p-2">
-            {{model.content}}
+        <div class="m-4 p-2" id="content">
+             {{& model.content}}
         </div>
     </div>
 
@@ -65,18 +65,19 @@
         </div>
     </div>
 </div>
-{{^sessionUser}}
 <script>
+{{^sessionUser}}
   const commentTextarea = document.querySelector("#comment");
-
   if (commentTextarea) {
     commentTextarea.addEventListener("focus", () => {
       alert("로그인하세요");
-      commentTextarea.blur(); // 입력 막기
+      commentTextarea.blur();
     });
   }
-</script>
 {{/sessionUser}}
+</script>
+
+
 
 
 
